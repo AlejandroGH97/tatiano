@@ -1,5 +1,5 @@
 from sqlite3 import connect
-from math import log10, sqrt
+from math import log10, sqrt, ceil
 
 DB_PATH = "./data/db/database.db"
 
@@ -21,7 +21,7 @@ def userCanHunt(user_id):
     cursor = cxn.execute(f'''SELECT ABS(JULIANDAY(LAST_HUNT) - JULIANDAY("now")) FROM HUNTERS WHERE USER_ID = {user_id}''')
     lastHunt = cursor.fetchone()[0] * 24 * 60
     cxn.close()
-    return lastHunt > 15
+    return lastHunt > 15, ceil(15-lastHunt)
 
 def getSpecies():
     cxn = connectDB()
@@ -73,14 +73,23 @@ def checkValidSale(user_id, specie, quantity):
 def sell(user_id, rarity, quantity, specie_id):
     cxn = connectDB()
     multiplier = 1 + (log10(quantity) / (rarity * ((1 + sqrt(5)) / 2)))
-    print('multiplier',multiplier)
     base = 50 / (0.05 * rarity ** 3)
-    print('base',base)
     total = round(quantity * base * multiplier,2)
-    print('total',total)
     cxn.execute(f'''UPDATE INVENTORY SET QUANTITY = QUANTITY - {quantity} WHERE USER_ID = {user_id} AND SPECIES_ID = {specie_id}''')
     cxn.execute(f'''UPDATE HUNTERS SET MONEY = MONEY + {total} WHERE USER_ID = {user_id}''')
     cxn.commit()
     cxn.close()
     return total
+
+def getLeaderboard():
+    cxn = connectDB()
+    result = cxn.execute('''SELECT USER_ID, MONEY FROM HUNTERS ORDER BY MONEY DESC LIMIT 10''').fetchall()
+    cxn.close()
+    return result
+
+def getRates():
+    cxn = connectDB()
+    speciesRates = cxn.execute('''SELECT NAME, RARITY FROM SPECIES ORDER BY RARITY ASC''').fetchall()
+    cxn.close()
+    return speciesRates
 

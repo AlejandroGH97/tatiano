@@ -49,8 +49,8 @@ async def sell(context):
         )
     await context.send(embed=response)
 
-@client.command(aliases=["help", "Help", "HELP", "h", "H"])
-async def _help(context):
+@client.command(aliases=["Help", "HELP", "h", "H"])
+async def help(context):
     response = discord.Embed(
             description=f"This is what Tatiano is able to do.",
             color=0xFFFF00
@@ -73,11 +73,24 @@ async def _help(context):
         inline=True
     )
     await context.send(embed=response)
+
+@client.command(aliases=["Leaderboard", "LEADERBOARD"])
+async def leaderboard(context):
+    await context.send(embed=hunting.leaderboard())
+
+@client.command(aliases=["Rates", "RATES"])
+async def rates(context):
+    await context.send(embed=hunting.huntRates())
+
+
+
+
+
 client.run(TOKEN)
 
 
 """
 TODO
 -Money Leaderboard
--Trade
+-Trade species
 """

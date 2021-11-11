@@ -2,11 +2,11 @@ import random
 import discord
 import db
 
-
 # https://tenor.com/users/mdesk99
 
 def hunt(user):
-    if db.userCanHunt(user.id):
+    canHunt, remaining = db.userCanHunt(user.id)
+    if canHunt:
         species = db.getSpecies()
         weights = []
         for specimen in species:
@@ -24,7 +24,7 @@ def hunt(user):
         return response
     else:
         response = discord.Embed(
-            description=f"You still need to recover energy from your last hunt.",
+            description=f"Your energy will recover in {remaining} minutes.",
             color=0xFFFF00
         )
         return response
@@ -78,3 +78,51 @@ def sell(user, specie, quantity):
                 color=0xFFFF00
             )
         return response
+
+def leaderboard():
+    leaderboard = db.getLeaderboard()
+    user_ids = ''
+    money = ''
+    for user in leaderboard:
+        user_ids += '<@' + user[0] + '>\n'
+        money += '$' + str(round(user[1],2)) + '\n'
+    response = discord.Embed(
+            title="Leaderboard",
+            color=0xFFFF00
+        )
+    response.add_field(
+        name='User',
+        value=user_ids,
+        inline=True
+    )
+    response.add_field(
+        name='Money',
+        value=money,
+        inline=True
+    )
+    return response
+
+def huntRates():
+    speciesRates = db.getRates()
+    species = ''
+    rates = ''
+    for entry in speciesRates:
+        species += entry[0] + '\n'
+        rates += str(entry[1]) + '\n'
+    response = discord.Embed(
+            desc="Hunt rates for all species.",
+            color=0xFFFF00
+        )
+    response.add_field(
+        name='Specie',
+        value=species,
+        inline=True
+    )
+    response.add_field(
+        name='Hunt rate',
+        value=rates,
+        inline=True
+    )
+    return response
+
+# 
