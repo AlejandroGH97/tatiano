@@ -57,7 +57,7 @@ def sell(user, specie, quantity):
     if quantity > 0 and validSale:
         revenue = db.sell(user.id, rarity, quantity, specie_id)
         response = discord.Embed(
-            description=f"You sold {quantity} {specie} for **${revenue}**.",
+            description=f"{user.mention} sold {quantity} {specie} for **${revenue}**.",
             color=0xFFFF00
         )
         return response
