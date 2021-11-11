@@ -16,11 +16,11 @@ def hunt(user):
         db.userHunted(user.id)
         response = discord.Embed(
             description=f"{user.mention} has caught a {catch[1]}!",
-            color=0xFFFF00
+            color=0xFFFF00,
         )
         response.set_thumbnail(url=catch[3])
-        rarity = "{:.2f}".format(1/catch[2])
-        response.set_footer(text=f'This specimen has a rarity of {rarity}!')
+        rarity = str(round(catch[2],2))
+        response.set_footer(text=f'This specie has a hunt rate of {rarity}!')
         return response
     else:
         response = discord.Embed(
@@ -40,16 +40,41 @@ def getInventory(user):
             description=f"{user.mention}'s inventory.",
             color=0xFFFF00
         )
-    
     response.add_field(name='Species', value=species,  inline=True)
     response.add_field(name='Quantity', value=quantities,  inline=True)
-    print(inventory)
     return response
 
 def getMoney(user):
-    money = db.getMoney(user.id)
+    money = round(db.getMoney(user.id),2)
     response = discord.Embed(
             description=f"{user.mention} has **${money}**.",
             color=0xFFFF00
         )
     return response
+
+def sell(user, specie, quantity):
+    validSale, specie_id, rarity = db.checkValidSale(user.id, specie, quantity)
+    if quantity > 0 and validSale:
+        revenue = db.sell(user.id, rarity, quantity, specie_id)
+        response = discord.Embed(
+            description=f"You sold {quantity} {specie} for **${revenue}**.",
+            color=0xFFFF00
+        )
+        return response
+    else:
+        if specie_id == -1: # Invalid species name
+            response = discord.Embed(
+                description=f'Invalid specie name.',
+                color=0xFFFF00
+            )
+        elif quantity < 1:
+            response = discord.Embed(
+                description=f'Can\'t sell quantities below 1.',
+                color=0xFFFF00
+            )
+        else:
+            response = discord.Embed(
+                description=f'You do not have enough {specie} to sell.',
+                color=0xFFFF00
+            )
+        return response

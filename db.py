@@ -1,5 +1,5 @@
 from sqlite3 import connect
-
+from math import log10, sqrt
 
 DB_PATH = "./data/db/database.db"
 
@@ -62,8 +62,25 @@ def getMoney(user_id):
     cxn.close()
     return money
 
-def checkValidSale(user_id, specimen, quantity):
+def checkValidSale(user_id, specie, quantity):
     cxn = connectDB()
-    species_id = cxn.execute(f'''SELECT ID FROM SPECIES WHERE NAME = {specimen}''').fetchone()[0]
-    userQuantity = cxn.execute(f'''SELECT QUANTITY FROM INVENTORY WHERE USER_ID = {user_id} AND SPECIES_ID = {species_id}''').fetchone()[0]
-    return userQuantity >= quantity
+    species = cxn.execute(f'''SELECT ID,RARITY FROM SPECIES WHERE NAME = "{specie}"''').fetchone()
+    if species == None:
+        return False, -1, 0
+    userQuantity = cxn.execute(f'''SELECT QUANTITY FROM INVENTORY WHERE USER_ID = {user_id} AND SPECIES_ID = {species[0]}''').fetchone()[0]
+    return userQuantity >= quantity, species[0], species[1]
+
+def sell(user_id, rarity, quantity, specie_id):
+    cxn = connectDB()
+    multiplier = 1 + (log10(quantity) / (rarity * ((1 + sqrt(5)) / 2)))
+    print('multiplier',multiplier)
+    base = 50 / (0.05 * rarity ** 3)
+    print('base',base)
+    total = round(quantity * base * multiplier,2)
+    print('total',total)
+    cxn.execute(f'''UPDATE INVENTORY SET QUANTITY = QUANTITY - {quantity} WHERE USER_ID = {user_id} AND SPECIES_ID = {specie_id}''')
+    cxn.execute(f'''UPDATE HUNTERS SET MONEY = MONEY + {total} WHERE USER_ID = {user_id}''')
+    cxn.commit()
+    cxn.close()
+    return total
+
