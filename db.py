@@ -33,12 +33,10 @@ def getSpecies():
 def catch(user_id, species_id):
     cxn = connectDB()
     res = cxn.execute(f'''SELECT ID, QUANTITY FROM INVENTORY WHERE USER_ID = {user_id} AND SPECIES_ID = {species_id}''').fetchall()
-    print(res)
     if len(res) < 1:
         cxn.execute(f'''INSERT INTO INVENTORY (USER_ID, SPECIES_ID, QUANTITY) VALUES ({user_id}, {species_id}, 1)''')
     else:
         row = res[0]
-        print('id',row[0],'newcount',row[1]+1)
         cxn.execute(f'''UPDATE INVENTORY SET QUANTITY = {row[1]+1} WHERE ID = {row[0]}''')
     cxn.commit()
     cxn.close()
