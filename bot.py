@@ -38,7 +38,6 @@ async def sell(context):
     user = context.message.author
     params = context.message.content[2:].split()
     specie = ' '.join(w.capitalize() for w in params[1:-1])
-    print(specie)
     quantity = int(params[-1])
     if params[-1].isdigit():
         response = hunting.sell(user, specie, quantity)
@@ -61,12 +60,12 @@ async def help(context):
         name="Hunting:",
         value='Commands for all hunting related activities.',
         inline=False
-    )
+        )
     response.add_field(
         name="Commands:",
         value=commandValues,
         inline=True
-    )
+        )
     response.add_field(
         name="Description:",
         value=descValues,
@@ -82,7 +81,13 @@ async def leaderboard(context):
 async def rates(context):
     await context.send(embed=hunting.huntRates())
 
-
+@client.command(aliases=["Check", "CHECK"])
+async def check(context):
+    params = context.message.content[2:].split()
+    specie = ' '.join(w.capitalize() for w in params[1:-1])
+    quantity = int(params[-1])
+    response = hunting.checkPrice(specie, quantity)
+    await context.send(embed=response)
 
 
 
@@ -91,6 +96,6 @@ client.run(TOKEN)
 
 """
 TODO
--Money Leaderboard
+-Check price
 -Trade species
 """

@@ -37,9 +37,9 @@ def getInventory(user):
         species += item[0] + '\n'
         quantities += str(item[1]) + '\n'
     response = discord.Embed(
-            description=f"{user.mention}'s inventory.",
-            color=0xFFFF00
-        )
+        description=f"{user.mention}'s inventory.",
+        color=0xFFFF00
+    )
     response.add_field(name='Species', value=species,  inline=True)
     response.add_field(name='Quantity', value=quantities,  inline=True)
     return response
@@ -47,9 +47,9 @@ def getInventory(user):
 def getMoney(user):
     money = round(db.getMoney(user.id),2)
     response = discord.Embed(
-            description=f"{user.mention} has **${money}**.",
-            color=0xFFFF00
-        )
+        description=f"{user.mention} has **${money}**.",
+        color=0xFFFF00
+    )
     return response
 
 def sell(user, specie, quantity):
@@ -112,7 +112,7 @@ def huntRates():
     response = discord.Embed(
             desc="Hunt rates for all species.",
             color=0xFFFF00
-        )
+    )
     response.add_field(
         name='Specie',
         value=species,
@@ -125,4 +125,17 @@ def huntRates():
     )
     return response
 
-# 
+def checkPrice(specie, quantity):
+    rarity = db.getRate(specie)
+    if rarity == -1:
+        response = discord.Embed(
+            description=f'Invalid specie name.',
+            color=0xFFFF00
+        )
+    else:
+        price = db.getPrice(rarity, quantity)
+        response = discord.Embed(
+            description=f'{quantity} {specie} would sell for **${price}**.',
+            color=0xFFFF00
+        )
+    return response

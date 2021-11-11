@@ -70,13 +70,17 @@ def checkValidSale(user_id, specie, quantity):
 
 def sell(user_id, rarity, quantity, specie_id):
     cxn = connectDB()
-    multiplier = 1 + (log10(quantity) / (rarity * ((1 + sqrt(5)) / 2)))
-    base = 50 / (0.05 * rarity ** 3)
-    total = round(quantity * base * multiplier,2)
+    total = getPrice(rarity, quantity)
     cxn.execute(f'''UPDATE INVENTORY SET QUANTITY = QUANTITY - {quantity} WHERE USER_ID = {user_id} AND SPECIES_ID = {specie_id}''')
     cxn.execute(f'''UPDATE HUNTERS SET MONEY = MONEY + {total} WHERE USER_ID = {user_id}''')
     cxn.commit()
     cxn.close()
+    return total
+
+def getPrice(rarity, quantity):
+    multiplier = 1 + (log10(quantity) / (rarity * ((1 + sqrt(5)) / 2)))
+    base = 50 / (0.05 * rarity ** 3)
+    total = round(quantity * base * multiplier,2)
     return total
 
 def getLeaderboard():
@@ -90,4 +94,12 @@ def getRates():
     speciesRates = cxn.execute('''SELECT NAME, RARITY FROM SPECIES ORDER BY RARITY ASC''').fetchall()
     cxn.close()
     return speciesRates
+
+def getRate(specie_name):
+    cxn = connectDB()
+    rarity = cxn.execute(f'''SELECT RARITY FROM SPECIES WHERE NAME = "{specie_name}"''').fetchone()
+    if rarity == None:
+        return -1
+    return rarity[0]
+
 
