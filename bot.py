@@ -96,6 +96,6 @@ client.run(TOKEN)
 
 """
 TODO
--Check price
 -Trade species
+-Check price equation
 """
